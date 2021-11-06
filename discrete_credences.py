@@ -2,6 +2,9 @@
 
 from os import terminal_size
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
 #np.random.seed(2021)
 golden = (1 + 5**0.5) / 2
 
@@ -12,26 +15,33 @@ def conditionalise(like_pre, prior_pre, norm_pre):
         post = like_pre * prior_pre / norm_pre
     return post
 
+def lockedown(credences, lockean_threshold=golden**-1):
+    beliefs = np.where(credences > lockean_threshold, 1, 0)
+    return beliefs
+
 def simulate(discretise=True, buckets=11, trials=20):
     if discretise == False:
         priors = np.random.rand(trials)
         norms = np.random.rand(trials)
-        likelihoods = np.empty(len(priors))
-        for i in range(len(likelihoods)):
+        likelihoods = np.empty(trials)
+        posteriors = np.empty(trials)
+        for i in range(trials):
             conj_prob = np.random.uniform(0, min(priors[i], norms[i])) # conjunction probability P(E&X)
             likelihoods[i] = conj_prob / priors[i]
-        for trial in range(trials):
-            posterior = conditionalise(likelihoods[trial], priors[trial], norms[trial])
-            print('likelihood:', likelihoods[trial], '\n',
-                    'prior:', priors[trial], '\n',
-                    'norm:', norms[trial], '\n',
-                    'posterior:', posterior, '\n')
+        for i in range(trials):
+            posteriors[i] = conditionalise(likelihoods[i], priors[i], norms[i])
+            print('likelihood:', likelihoods[i], '\n',
+                    'prior:', priors[i], '\n',
+                    'norm:', norms[i], '\n',
+                    'posterior:', posteriors[i], '\n')
+        return priors, norms, likelihoods, posteriors
     if discretise == True:
         discs = np.linspace(0, 1, buckets)
         priors = np.random.choice(discs, trials)
         norms = np.random.choice(discs, trials)
-        likelihoods = np.empty(len(priors))
-        for i in range(len(likelihoods)):
+        likelihoods = np.empty(trials)
+        posteriors = np.empty(trials)
+        for i in range(trials):
             minimum = min(priors[i], norms[i])
             valid_probs = [d for d in discs if d <= minimum]
             conj_prob = np.random.choice(valid_probs)
@@ -41,31 +51,37 @@ def simulate(discretise=True, buckets=11, trials=20):
                 closest_like_index = np.argmin(np.abs(discs - anal_like))
                 likelihoods[i] = discs[closest_like_index]
         bad_counter = 0
-        for trial in range(trials):
-            anal_post = conditionalise(likelihoods[trial], priors[trial], norms[trial])
+        for i in range(trials):
+            anal_post = conditionalise(likelihoods[i], priors[i], norms[i])
             if np.isnan(anal_post):
-                posterior = float('nan')
+                posteriors[i] = float('nan')
             else:
                 closest_post_index = np.argmin(np.abs(discs - anal_post))
-                posterior = discs[closest_post_index]
-            print('likelihood:', "{:.2f}".format(likelihoods[trial]), '\n',
-                    'prior:', "{:.2f}".format(priors[trial]), '\n',
-                    'norm:', "{:.2f}".format(norms[trial]), '\n',
-                    'posterior:', "{:.2f}".format(posterior))
-            if posterior not in discs and np.isnan(posterior)==False:
+                posteriors[i] = discs[closest_post_index]
+            print('likelihood:', "{:.2f}".format(likelihoods[i]), '\n',
+                    'prior:', "{:.2f}".format(priors[i]), '\n',
+                    'norm:', "{:.2f}".format(norms[i]), '\n',
+                    'posterior:', "{:.2f}".format(posteriors[i]))
+            if posteriors[i] not in discs and np.isnan(posteriors[i])==False:
                 print('*********** OUT OF BOUNDS POSTERIOR *********** \n')
             else: print('\n')
+        return priors, norms, likelihoods, posteriors
 
-simulate(discretise=True, buckets=101, trials=20)
+cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=20)
+updates = cred_post - cred_pre
 
-def lockedown(lockean_threshold=golden**-1):
-    pass
+print('Credences before updating: ', cred_pre)
+print('Credences after updating: ', cred_post)
+print('Updates: ', cred_post - cred_pre)
+
+beliefs_pre = lockedown(cred_pre)
+beliefs_post = lockedown(cred_post)
+print(beliefs_pre)
+print(beliefs_post)
 
 '''
 TODO
-- Vectorise everything (think about things I can do with these vectors, and about what they mean)
-- Be able to visualise everything
-- Return priors, likelihoods, norms, posteriors and updates.
-- Define lockedown function which takes a vector of posteriors and converts it into a binary full belief vector with some threshold.
-- 
+- Be able to visualise everything.
+- Add capability to do filtering over multiple 'steps', so that each trial involves conditioning multiple times.
+- How can I study the behaviour of the DC model?
 '''
