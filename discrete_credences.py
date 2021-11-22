@@ -2,18 +2,36 @@
 
 from os import terminal_size
 import numpy as np
+import sympy as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set()
 #np.random.seed(2021)
 golden = (1 + 5**0.5) / 2
 
-def conditionalise(like_pre, prior_pre, norm_pre):
+#P_f(H) = P_i(E|H)•P_i(H)/P_i(E)
+def simple_condition(like_pre, prior_pre, norm_pre):
     if norm_pre == 0.0: 
         post = float("nan")
     else:
         post = like_pre * prior_pre / norm_pre
     return post
+
+#P_f(H) = P_i(H|E)P_f(E)+P_i(H|~E)P_f(~E)
+#       = 
+#post   = simple_condition(evid)•evid_prob + simple_condition(nevid)•nevid_prob
+def jeffrey_condition(like_pres, prior_pre, norm_pres, evid_probs):
+    # all plural arguments should be lists of the same length (2 in the simplest case, E or ~E), 
+    #   but there is only one prior P_i(H). But the others depend on possible values of E: 
+    #   likelihoods are P_i(E=e|H), norms are P_i(E=e), (new) evid_probs are P_f(E=e)
+    simple_conds = []
+    for i in range(len(like_pres)):
+        simple_conds.append(simple_condition(like_pres[i], prior_pre, norm_pres[i]))
+    jeff_post = sum([a * b for a, b in zip(simple_conds, evid_probs)])
+    return jeff_post
+
+#testing jeffrey_condition():
+#
 
 def lockedown(credences, lockean_threshold=golden**-1):
     beliefs = np.where(credences > lockean_threshold, 1, 0)
@@ -29,7 +47,7 @@ def simulate(discretise=True, buckets=11, trials=20):
             conj_prob = np.random.uniform(0, min(priors[i], norms[i])) # conjunction probability P(E&X)
             likelihoods[i] = conj_prob / priors[i]
         for i in range(trials):
-            posteriors[i] = conditionalise(likelihoods[i], priors[i], norms[i])
+            posteriors[i] = simple_condition(likelihoods[i], priors[i], norms[i])
             print('likelihood:', likelihoods[i], '\n',
                     'prior:', priors[i], '\n',
                     'norm:', norms[i], '\n',
@@ -52,7 +70,7 @@ def simulate(discretise=True, buckets=11, trials=20):
                 likelihoods[i] = discs[closest_like_index]
         bad_counter = 0
         for i in range(trials):
-            anal_post = conditionalise(likelihoods[i], priors[i], norms[i])
+            anal_post = simple_condition(likelihoods[i], priors[i], norms[i])
             if np.isnan(anal_post):
                 posteriors[i] = float('nan')
             else:
@@ -67,21 +85,25 @@ def simulate(discretise=True, buckets=11, trials=20):
             else: print('\n')
         return priors, norms, likelihoods, posteriors
 
-cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=20)
+'''
+cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=5)
 updates = cred_post - cred_pre
-
 print('Credences before updating: ', cred_pre)
 print('Credences after updating: ', cred_post)
 print('Updates: ', cred_post - cred_pre)
-
-beliefs_pre = lockedown(cred_pre)
-beliefs_post = lockedown(cred_post)
-print(beliefs_pre)
-print(beliefs_post)
-
 '''
-TODO
-- Be able to visualise everything.
-- Add capability to do filtering over multiple 'steps', so that each trial involves conditioning multiple times.
-- How can I study the behaviour of the DC model?
-'''
+
+# simple filtering example with 3 updates
+
+cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=11, trials=1)
+for i in range(5):
+    cred_pre = cred_post
+    cred_post = simple_condition(like_pre, cred_pre, norm_pre)
+    print(cred_post)
+
+
+def sync_log():
+    pass
+
+def sync_prob():
+    pass
