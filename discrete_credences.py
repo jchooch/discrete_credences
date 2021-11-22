@@ -93,14 +93,12 @@ print('Credences after updating: ', cred_post)
 print('Updates: ', cred_post - cred_pre)
 '''
 
-# simple filtering example with 3 updates
-
+# simple filtering example with 3 updates INCOMPLETE
 cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=11, trials=1)
 for i in range(5):
     cred_pre = cred_post
     cred_post = simple_condition(like_pre, cred_pre, norm_pre)
     print(cred_post)
-
 
 def sync_log():
     pass
