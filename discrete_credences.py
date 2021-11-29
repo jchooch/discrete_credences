@@ -89,7 +89,9 @@ def simulate(discretise=True, buckets=11, trials=20):
 cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=5)
 updates = cred_post - cred_pre
 print('Credences before updating: ', cred_pre)
+print('\n')
 print('Credences after updating: ', cred_post)
+print('\n')
 print('Updates: ', cred_post - cred_pre)
 '''
 
