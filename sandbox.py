@@ -2,9 +2,10 @@
 
 import numpy as np
 
-x = [[1, 2, 3], [1, 2], 1, [1, 2, 3]]
-y = [[2, 3, 4], [2, 3], 2, [2, 3, 4]]
-print(x[:][:,0])
+for index in range(100):
+    print(index)
+
+print(len(np.arange(100)))
 
 '''
 mix_list = [[1], [2, 3], [4, 5, 6]]
