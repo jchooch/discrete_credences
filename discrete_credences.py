@@ -48,7 +48,6 @@ def simple_condition(like_pre, prior_pre, norm_pre):
     return post
 
 #P_f(H) = P_i(H|E)P_f(E)+P_i(H|~E)P_f(~E)
-#       = 
 #post   = simple_condition(evid)•evid_prob + simple_condition(nevid)•nevid_prob
 def jeffrey_condition(like_pres, prior_pre, norm_pres, evid_probs):
     # all plural arguments should be lists of the same length (2 in the simplest case, E or ~E), 
@@ -116,16 +115,6 @@ def simulate(discretise=True, buckets=11, trials=20):
         return priors, norms, likelihoods, posteriors
 
 '''
-cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=5)
-updates = cred_post - cred_pre
-print('Credences before updating: ', cred_pre)
-print('\n')
-print('Credences after updating: ', cred_post)
-print('\n')
-print('Updates: ', cred_post - cred_pre)
-'''
-
-'''
 # simple filtering example with 3 updates INCOMPLETE
 cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=11, trials=1)
 for i in range(5):
@@ -141,6 +130,24 @@ def sync_prob():
 '''
 
 
+cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=101, trials=5)
+updates = cred_post - cred_pre
+print('Credences before updating: ', cred_pre)
+print('\n')
+print('Credences after updating: ', cred_post)
+print('\n')
+print('Updates: ', cred_post - cred_pre)
+
+# conditionalise with buckets
+    # compute difference between true credence and discretised credence
+        # using bucket decoding (mean of bucket)
+        # using distance of analytic credence to closest boundary (how much credence would have to differ to result in different disc)
+        # using bucket-disagreement over local hyperparams
+
+
+### SAVED ###
+
+''' PLOT NUMBER OF BUCKETS VS BUCKET SIZE
 record = []
 print('RECORD', record)
 for j in range(1,100):
@@ -154,9 +161,4 @@ plt.plot(num_buckets_vec, bucket_size_vec)
 plt.xlabel('Number of buckets')
 plt.ylabel('Bucket size')
 plt.show()
-
-# conditionalise with buckets
-    # compute difference between true credence and discretised credence
-        # using bucket decoding (mean of bucket)
-        # using distance of analytic credence to closest boundary (how much credence would have to differ to result in different disc)
-        # using bucket-disagreement over local hyperparams
+'''
