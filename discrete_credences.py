@@ -135,26 +135,15 @@ def sync_prob():
     pass
 '''
 
-
-
-'''
-cred_pre, norm_pre, like_pre, cred_post, anal_post = simulate(discretise=True, buckets=11, trials=5)
-updates = cred_post - cred_pre
-print('Credences before updating: ', cred_pre)
-print('\n')
-print('Credences after updating: ', cred_post)
-print('\n')
-print('Updates: ', cred_post - cred_pre)
-'''
-
 # conditionalise with buckets
     # compute difference between true credence and discretised credence
         # using bucket decoding (mean of bucket)
         # using distance of analytic credence to closest boundary (how much credence would have to differ to result in different disc)
         # using bucket-disagreement over local hyperparams
 
-
-### SAVED ###
+############################################################################
+########################### SAVED VISUALIZATIONS ###########################
+############################################################################
 
 ''' PLOT NUMBER OF BUCKETS VS BUCKET SIZE
 record = []
@@ -188,5 +177,32 @@ plt.plot(np.arange(test_buckets), mean_squared_errors)
 plt.title('Single-update MSE for different numbers of buckets with low-precision initial credences')
 plt.xlabel('Number of buckets')
 plt.ylabel('Mean squared error (MSE)')
+plt.show()
+'''
+
+''' AVERAGE ABSOLUTE UPDATES FOR RANDOM EVIDENCE VS NUMBER OF BUCKETS FOR LOW AND HIGH PRECISION CREDENCES (Remember high-precision line is not a function of number of buckets)
+mean_abs_updates_disc = np.zeros(100)
+mean_abs_updates_cont = np.zeros(100)
+for j in range(100):
+    cred_pre_disc, _, _, cred_post_disc, _ = simulate(discretise=True, buckets=j+1, trials=1000)
+    cred_pre_cont, _, _, cred_post_cont = simulate(discretise=False, buckets=j+1, trials=1000)
+    updates_disc = cred_post_disc - cred_pre_disc
+    updates_cont = cred_post_cont - cred_pre_cont
+    print('Low-precision updates: ', cred_post_disc - cred_pre_disc)
+    print('High-precision updates: ', cred_post_cont - cred_pre_cont)
+    abs_updates_disc = np.abs(cred_post_disc - cred_pre_disc)
+    abs_updates_cont = np.abs(cred_post_cont - cred_pre_cont)
+    print('Absolute low-precision updates: ', abs_updates_disc)
+    print('Absolute high-precision updates: ', abs_updates_cont)
+    mean_abs_update_disc = np.mean(abs_updates_disc)
+    mean_abs_update_cont = np.mean(abs_updates_cont)
+    print('Mean absolute low-precision update: ', mean_abs_update_disc)
+    print('Mean absolute high-precision update: ', mean_abs_update_cont)
+    mean_abs_updates_disc[j] = mean_abs_update_disc
+    mean_abs_updates_cont[j] = mean_abs_update_cont
+plt.plot(np.arange(1,101), mean_abs_updates_disc, label='low-precision credences')
+plt.plot(np.arange(1,101), mean_abs_updates_cont, label='high-precision credences')
+plt.legend()
+plt.title('Average absolute update for random evidence')
 plt.show()
 '''
