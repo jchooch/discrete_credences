@@ -9,6 +9,36 @@ sns.set()
 #np.random.seed(2021)
 golden = (1 + 5**0.5) / 2
 
+def dox_states(num_buckets, quiet=False):
+    assert num_buckets > 0, 'Must have at least 1 bucket!'
+    bucket_size = 1 / num_buckets
+    bounds = [i * bucket_size for i in range(num_buckets)]
+    bounds.append(1.0)   
+    buckets = []
+    for i in range(num_buckets):
+        buckets.append([bounds[i], bounds[i+1]])
+    num_means = num_buckets
+    bucket_means = []
+    for i in range(num_buckets):
+        bucket_means.append(np.mean(buckets[i]))
+    num_bounds = num_buckets + 1
+    gamma = bucket_size / 2
+    buckets_for_printing = [['{:.3f}'.format(elem) for elem in buckets[i]] for i in range(len(buckets))]
+    if quiet==False:
+        print('___________________________________________')    
+        print('(All to 3 decimal places...)')
+        print('Number of buckets: ', num_buckets)
+        print('Bucket size/width: ', format(bucket_size, '.3f'))
+        print('Number of bucket boundaries: ', num_bounds)
+        print('Bucket boundaries: ', ['{:.3f}'.format(elem) for elem in bounds])
+        print('Buckets: ', buckets_for_printing)
+        print('Number of bucket means: ', num_means)
+        print('Bucket means: ', ['{:.3f}'.format(elem) for elem in bucket_means])
+        print('Gamma: ', format(gamma, '.3f'))
+    else:
+        print('Quieted...')
+    return [num_buckets, bucket_size, num_bounds, bounds, buckets, num_means, bucket_means, gamma]
+
 #P_f(H) = P_i(E|H)•P_i(H)/P_i(E)
 def simple_condition(like_pre, prior_pre, norm_pre):
     if norm_pre == 0.0: 
@@ -95,6 +125,7 @@ print('\n')
 print('Updates: ', cred_post - cred_pre)
 '''
 
+'''
 # simple filtering example with 3 updates INCOMPLETE
 cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=11, trials=1)
 for i in range(5):
@@ -107,3 +138,25 @@ def sync_log():
 
 def sync_prob():
     pass
+'''
+
+
+record = []
+print('RECORD', record)
+for j in range(1,100):
+    record.append(dox_states(j, True))
+num_buckets_vec = [record[:][i][0] for i in range(len(record))]
+bucket_size_vec = [record[:][i][1] for i in range(len(record))]
+print(num_buckets_vec)
+print(bucket_size_vec)
+
+plt.plot(num_buckets_vec, bucket_size_vec)
+plt.xlabel('Number of buckets')
+plt.ylabel('Bucket size')
+plt.show()
+
+# conditionalise with buckets
+    # compute difference between true credence and discretised credence
+        # using bucket decoding (mean of bucket)
+        # using distance of analytic credence to closest boundary (how much credence would have to differ to result in different disc)
+        # using bucket-disagreement over local hyperparams
