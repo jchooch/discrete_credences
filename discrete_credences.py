@@ -9,6 +9,7 @@ sns.set()
 #np.random.seed(2021)
 golden = (1 + 5**0.5) / 2
 
+# Compute bucket statistics
 def dox_states(num_buckets, quiet=False):
     assert num_buckets > 0, 'Must have at least 1 bucket!'
     bucket_size = 1 / num_buckets
@@ -35,8 +36,6 @@ def dox_states(num_buckets, quiet=False):
         print('Number of bucket means: ', num_means)
         print('Bucket means: ', ['{:.3f}'.format(elem) for elem in bucket_means])
         print('Gamma: ', format(gamma, '.3f'))
-    else:
-        print('Quieted...')
     return [num_buckets, bucket_size, num_bounds, bounds, buckets, num_means, bucket_means, gamma]
 
 #P_f(H) = P_i(E|H)•P_i(H)/P_i(E)
@@ -59,9 +58,6 @@ def jeffrey_condition(like_pres, prior_pre, norm_pres, evid_probs):
         simple_conds.append(simple_condition(like_pres[i], prior_pre, norm_pres[i]))
     jeff_post = sum([a * b for a, b in zip(simple_conds, evid_probs)])
     return jeff_post
-
-#testing jeffrey_condition():
-#
 
 def lockedown(credences, lockean_threshold=golden**-1):
     beliefs = np.where(credences > lockean_threshold, 1, 0)
@@ -119,6 +115,55 @@ def simulate(discretise=True, buckets=11, trials=20, quiet=False):
                     print('*********** OUT OF BOUNDS POSTERIOR *********** \n')
                 else: print('\n')
         return priors, norms, likelihoods, posteriors, anal_posts
+
+# TAKES IN c(X) AND A NUMBER OF BUCKETS AND RETURNS b(X)
+def bucket_id(N, credence, quiet=False):
+    i = 0
+    while credence >= i / N: 
+        i += 1
+    bucket_id = i - 1
+    model_info = dox_states(N, quiet=True)
+    buckets = model_info[4]
+    if quiet == False:
+        print('bucket_id: ', bucket_id)
+        print('bucket range: ', buckets[bucket_id])
+    return bucket_id, buckets[bucket_id]
+
+def symmetry_test(N, credence, quiet=False):
+    model_info = dox_states(N, quiet=True)
+    buckets = model_info[4]
+    pos_id, pos_range = bucket_id(N, credence, quiet=True)
+    neg_id, neg_range = bucket_id(N, 1 - credence, quiet=True)
+    if pos_id == N - 1 - neg_id: symmetric = True
+    else: symmetric = False
+    if quiet == False:
+        print('N: ', N)
+        print('X is in bucket {}, whose range is {}'.format(pos_id, pos_range))
+        print('~ X is in bucket {}, whose range is {}'.format(neg_id, neg_range))
+        if symmetric == True: print('PASS: X and ~X ARE symmetrically bucketed.')
+        else: print('FAIL: X and ~X are NOT symmetrically bucketed.')
+        print()
+    return pos_id, neg_id, symmetric
+
+symmetry_test(2, 0.5)
+print('\n')
+symmetry_test(3, 0.5)
+print('\n')
+symmetry_test(4, 0.5)
+print('\n')
+symmetry_test(5, 0.5)
+
+# Relationship between number of buckets and symmetry
+#mat = np.array((10,))
+#for i in range(0, 1, 10):
+#    for j in range(100):
+#        symmetry_test(j, i)
+
+'''
+for i in [2, 11, 50, 101]:
+    dox_states(i, quiet=True)
+    bucket_id(i, 0.618)
+'''
 
 '''
 # simple filtering example with 3 updates INCOMPLETE
@@ -205,4 +250,8 @@ plt.plot(np.arange(1,101), mean_abs_updates_cont, label='high-precision credence
 plt.legend()
 plt.title('Average absolute update for random evidence')
 plt.show()
+'''
+
+'''FILTERING!
+
 '''
