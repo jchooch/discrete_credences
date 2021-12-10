@@ -145,52 +145,11 @@ def symmetry_test(N, credence, quiet=False):
         print()
     return pos_id, neg_id, symmetric
 
-symmetry_test(2, 0.5)
-print('\n')
-symmetry_test(3, 0.5)
-print('\n')
-symmetry_test(4, 0.5)
-print('\n')
-symmetry_test(5, 0.5)
-
-# Relationship between number of buckets and symmetry
-#mat = np.array((10,))
-#for i in range(0, 1, 10):
-#    for j in range(100):
-#        symmetry_test(j, i)
-
-'''
-for i in [2, 11, 50, 101]:
-    dox_states(i, quiet=True)
-    bucket_id(i, 0.618)
-'''
-
-'''
-# simple filtering example with 3 updates INCOMPLETE
-cred_pre, norm_pre, like_pre, cred_post = simulate(discretise=True, buckets=11, trials=1)
-for i in range(5):
-    cred_pre = cred_post
-    cred_post = simple_condition(like_pre, cred_pre, norm_pre)
-    print(cred_post)
-
-def sync_log():
-    pass
-
-def sync_prob():
-    pass
-'''
-
-# conditionalise with buckets
-    # compute difference between true credence and discretised credence
-        # using bucket decoding (mean of bucket)
-        # using distance of analytic credence to closest boundary (how much credence would have to differ to result in different disc)
-        # using bucket-disagreement over local hyperparams
-
 ############################################################################
 ########################### SAVED VISUALIZATIONS ###########################
 ############################################################################
 
-''' PLOT NUMBER OF BUCKETS VS BUCKET SIZE
+#PLOT NUMBER OF BUCKETS VS BUCKET SIZE
 record = []
 print('RECORD', record)
 for j in range(1,100):
@@ -199,14 +158,13 @@ num_buckets_vec = [record[:][i][0] for i in range(len(record))]
 bucket_size_vec = [record[:][i][1] for i in range(len(record))]
 print(num_buckets_vec)
 print(bucket_size_vec)
-
 plt.plot(num_buckets_vec, bucket_size_vec)
+plt.title('Relationship between number of buckets and bucket width')
 plt.xlabel('Number of buckets')
-plt.ylabel('Bucket size')
+plt.ylabel('Bucket width')
 plt.show()
-'''
 
-'''TEST RELATIONSHIP BETWEEN NUMBER OF BUCKETS AND MSEs, ASSUMING LOW PRECISION INITIAL CREDENCES
+#TEST RELATIONSHIP BETWEEN NUMBER OF BUCKETS AND MSEs, ASSUMING LOW PRECISION INITIAL CREDENCES
 test_buckets = 100 # number of bucket sizes to test
 trials_per_test = 1000
 mean_squared_errors = np.zeros(test_buckets)
@@ -219,13 +177,12 @@ for bux in range(test_buckets):
     print('MSE: ', mean_squared_error)
     mean_squared_errors[bux] = mean_squared_error
 plt.plot(np.arange(test_buckets), mean_squared_errors)
-plt.title('Single-update MSE for different numbers of buckets with low-precision initial credences')
+plt.title('Single-update MSE between bucketed and analytic credences for different N \n (With bucketed initial credences)')
 plt.xlabel('Number of buckets')
 plt.ylabel('Mean squared error (MSE)')
 plt.show()
-'''
 
-''' AVERAGE ABSOLUTE UPDATES FOR RANDOM EVIDENCE VS NUMBER OF BUCKETS FOR LOW AND HIGH PRECISION CREDENCES (Remember high-precision line is not a function of number of buckets)
+# AVERAGE ABSOLUTE UPDATES FOR RANDOM EVIDENCE VS NUMBER OF BUCKETS FOR LOW AND HIGH PRECISION CREDENCES (Remember high-precision line is not a function of number of buckets)
 mean_abs_updates_disc = np.zeros(100)
 mean_abs_updates_cont = np.zeros(100)
 for j in range(100):
@@ -245,13 +202,8 @@ for j in range(100):
     print('Mean absolute high-precision update: ', mean_abs_update_cont)
     mean_abs_updates_disc[j] = mean_abs_update_disc
     mean_abs_updates_cont[j] = mean_abs_update_cont
-plt.plot(np.arange(1,101), mean_abs_updates_disc, label='low-precision credences')
-plt.plot(np.arange(1,101), mean_abs_updates_cont, label='high-precision credences')
+plt.plot(np.arange(1,101), mean_abs_updates_disc, label='bucketed credences')
+plt.plot(np.arange(1,101), mean_abs_updates_cont, label='analytic credences')
 plt.legend()
-plt.title('Average absolute update for random evidence')
+plt.title('Average absolute update based on random evidence for different N')
 plt.show()
-'''
-
-'''FILTERING!
-
-'''
